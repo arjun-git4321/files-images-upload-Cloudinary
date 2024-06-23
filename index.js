@@ -3,12 +3,16 @@ const express=require('express');
 const app=express();
 require('dotenv').config();
 
-app.use(express.json());
+
 
 const PORT=process.env.PORT || 9000
 
+app.use(express.json());
 const fileupload=require("express-fileupload");
-app.use(fileupload());
+app.use(fileupload({
+    useTempFiles : true,
+    tempFileDir : '/tmp/'
+}));
 
 
 const db=require("./configurations/database")
@@ -23,9 +27,9 @@ cloudinary.cloudinaryConnect();
 
 
 
-const nodes=require('./routes/fileUpload');
+const upload=require("./routes/FileUploading");
 
-app.use('/api/v1',nodes);
+app.use('/api/v1',upload);
 
 
 

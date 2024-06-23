@@ -6,18 +6,16 @@ const fileSchema=new mongoose.Schema({
         type:String,
         require:true,
     },
-    email:{
-        type:String,
-        required:true,
-    },
     imageUrl:{
         type:String,
-        required:true,
     },
     tags:{
         type:String,
-    }
+    },
+    email:{
+        type:String,
+    },
 
 })
-const file=mongoose.model("File",fileSchema);
-module.exports=file;
+const File=mongoose.model("File",fileSchema);
+module.exports=File;
