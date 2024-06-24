@@ -33,10 +33,13 @@ function isSupported(type,imageSupporter){
 
 }
 
-async function uploadToCloudinary(file,folder){
+async function uploadToCloudinary(file,folder,quality){
 
     const options={folder};
     options.resource_type="auto";
+    if(quality){
+        options.quality=quality;
+    }
     return await cloudinary.uploader.upload(file.tempFilePath, options);  
 }
 exports.imageUploader=async(req,res)=>{
@@ -104,6 +107,9 @@ async function UploadToCloudinary(file,folder){
 
     const options={folder};
     options.resource_type="auto";
+    // if(file>5*1024*1024){
+    //     return console.log("video not ");
+    //     }
 return await cloudinary.uploader.upload(file.tempFilePath, options);
 }
 
@@ -120,6 +126,7 @@ exports.videoUpload=async (req,res)=>{
 
         const videoSupport=["mp4","mov"];
         const videoType=file.name.split('.')[1].toLowerCase();
+        const videoSize=5*1024*1024;
         console.log(videoType);
 
         if(!isVideoSupport(videoType,videoSupport)){
@@ -129,9 +136,12 @@ exports.videoUpload=async (req,res)=>{
             });
         }
 
+        
+
         const rep=await UploadToCloudinary(file, "ArjunPics");
 
         console.log(rep);
+
 
 
         const fileData=await File.create({
@@ -158,4 +168,61 @@ exports.videoUpload=async (req,res)=>{
         })
         
     }
+}
+
+exports.imageReducer=async(req,res)=>{
+    try{
+        const {name,tags,email}=req.body;
+        console.log(name,tags,email);
+
+        const file=req.files.imageFile;
+        console.log(file);
+
+
+
+        //validation
+        const imageSupporter=["jpg","png","jpeg"];
+        const fileTypes=file.name.split(".")[1].toLowerCase();
+        console.log("coming", fileTypes);
+
+
+        if(!isSupported(fileTypes, imageSupporter)){
+            return res.status(400).json({
+                success:false,
+                message:'file format not support',
+            })
+        }
+        console.log("coming too");
+        const rep = await uploadToCloudinary(file, "ArjunPics", 30);
+        console.log(rep);
+        // console.log("yes coming");
+
+
+
+
+        res.json({
+            success:true,
+            imageUrl:rep.secure_url,
+            message:'image uploaded successfully',
+        })
+
+        const imagefile=await File.create({
+        name,
+        email,
+        imageUrl:rep.secure_url,
+        tags
+
+        })
+
+    }
+    catch(error){
+        console.log(err);
+        res.status(500).json({
+            success:false,
+            message:'error while uploading video to cloudinary',
+
+        })
+
+    }
+
 }
